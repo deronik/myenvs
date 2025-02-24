@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 from typing import Iterator
 
-import pexpect
-
 from .settings import settings
 
 
@@ -61,6 +59,14 @@ class EnvironmentRepository:
         env.envs = envs
         return env
 
+    @staticmethod
+    def remove_environment(name: str) -> None:
+        f = EnvironmentRepository.STORAGE / f"{name}.env"
+        if f.exists():
+            f.unlink()
+        else:
+            raise FileNotFoundError
+
 
 class EnvironmentService:
     @staticmethod
@@ -76,11 +82,12 @@ class EnvironmentService:
             yield env.name
 
     @staticmethod
-    def activate_environment(name: str) -> bool:
-        if "MYENVS_PATH" in os.environ:
-            raise ValueError("Environment already activated")
-        environment = EnvironmentRepository.get_environment(name)
-        child = pexpect.spawn(environment.shell, cwd=environment.path)
-        child.sendline(f"source {EnvironmentRepository.STORAGE / name}.env")
-        child.interact()
-        return True
+    def activate_environment_cmd(name: str) -> str:
+        _env = EnvironmentRepository.get_environment(name)
+        source_command = f"source {EnvironmentRepository.STORAGE / name}.env"
+        cd_command = f"cd {_env.path}"
+        return f"{source_command} && {cd_command}"
+
+    @staticmethod
+    def remove_environment(name: str) -> None:
+        EnvironmentRepository.remove_environment(name)

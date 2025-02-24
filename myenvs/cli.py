@@ -14,15 +14,15 @@ class CLIParser:
         self.command_arguments = defaultdict(list)
 
     def register_command(self, func: callable) -> callable:
-        self.commands[func.__name__] = func
-        subparser = self.subparsers.add_parser(func.__name__, help=func.__doc__)
+        self.commands[func.__name__.rstrip("_")] = func
+        subparser = self.subparsers.add_parser(func.__name__.rstrip("_"), help=func.__doc__)
         for args, kwargs in self.command_arguments[func.__name__]:
             subparser.add_argument(*args, **kwargs)
         return func
 
     def add_argument(self, *args, **kwargs) -> callable:
         def wrapper(func):
-            self.command_arguments[func.__name__].append((args, kwargs))
+            self.command_arguments[func.__name__.rstrip("_")].append((args, kwargs))
             return func
 
         return wrapper
@@ -38,15 +38,7 @@ parser = CLIParser()
 
 
 @parser.register_command
-@parser.add_argument("name", help="Name of the environment")
-def config(name: str) -> None:
-    """cofiguration"""
-    print("config")
-    print(name)
-
-
-@parser.register_command
-def list_envs() -> None:
+def list_() -> None:
     services = EnvironmentService.list_environments()
     print("Environments:")
     for service in services:
@@ -57,26 +49,26 @@ def list_envs() -> None:
 @parser.add_argument("name", help="Name of the environment")
 def save(name: str) -> None:
     EnvironmentService.save_current_environment(name)
-    ...
 
 
 @parser.register_command
 @parser.add_argument("name", help="Name of the environment")
 def activate(name: str) -> None:
     try:
-        EnvironmentService.activate_environment(name)
+        print(EnvironmentService.activate_environment_cmd(name))
     except FileNotFoundError:
         print("Environment not found")
-        return
-    except ValueError as e:
-        print("Environment already activate, please exit")
         return
 
 
 @parser.register_command
 @parser.add_argument("name", help="Name of the environment")
-def workon(name: str) -> None:
-    ...
+def remove(name: str) -> None:
+    try:
+        EnvironmentService.remove_environment(name)
+    except FileNotFoundError:
+        print("Environment not found")
+        return
 
 
 def main() -> None:
