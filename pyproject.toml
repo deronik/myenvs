@@ -1,0 +1,26 @@
+[project]
+name = "myenvs"
+description = "Tool for managing environments"
+readme = "README.md"
+requires-python = ">=3.11"
+dynamic = ["dependencies", "optional-dependencies", "version"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = { file = ["requirements-dev.txt"] }}
+version = {attr = "myenvs.__version__"}
+
+[tool.black]
+target-version = ["py311"]
+line-length = 120
+
+[tool.flake8]
+exclude = [".venv", "venv"]
+max-line-length = 120
+
+[tool.isort]
+line_length = 120
+profile = "black"
+
+[project.scripts]
+myenvs = "myenvs.cli:main"
