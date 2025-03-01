@@ -27,3 +27,9 @@ myenvs list
 ```bash
 myenvs remove <env_name>
 ```
+
+## How to install auto-completion
+1. Install auto-completion:
+```bash
+cp zsh-completion/_myenvs ~/.oh-my-zsh/completions/_myenvs
+```

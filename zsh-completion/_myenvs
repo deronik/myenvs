@@ -1,0 +1,38 @@
+#compdef myenvs
+
+_myenvs () {
+  _arguments -C \
+    '--help[display help]' \
+    ':command:->command' \
+    '*::args:->args'
+
+  case $state in
+    (command)
+      local -a commands
+      commands=(
+        list:'List all environments'
+        create:'Create a new environment'
+        remove:'Remove an environment'
+        activate:'Activate an environment'
+      )
+
+      _describe -t commands "Available commands" commands
+      ;;
+    (args)
+      case $words[1] in
+        remove)
+          local -a envs
+          envs=($(myenvs list --no-headers))  # Lazy evaluation
+          _values "Available environments" $envs
+          ;;
+        activate)
+          local -a envs
+          envs=($(myenvs list --no-headers))  # Lazy evaluation
+          _values "Available environments" $envs
+          ;;
+      esac
+      ;;
+  esac
+}
+
+compdef _myenvs myenvs

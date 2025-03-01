@@ -16,7 +16,7 @@ class CLIParser:
     def register_command(self, func: callable) -> callable:
         self.commands[func.__name__.rstrip("_")] = func
         subparser = self.subparsers.add_parser(func.__name__.rstrip("_"), help=func.__doc__)
-        for args, kwargs in self.command_arguments[func.__name__]:
+        for args, kwargs in self.command_arguments[func.__name__.rstrip("_")]:
             subparser.add_argument(*args, **kwargs)
         return func
 
@@ -38,9 +38,11 @@ parser = CLIParser()
 
 
 @parser.register_command
-def list_() -> None:
+@parser.add_argument("--no-headers", help="No print headers", action="store_true")
+def list_(no_headers: bool = False) -> None:
     services = EnvironmentService.list_environments()
-    print("Environments:")
+    if not no_headers:
+        print("Environments:")
     for service in services:
         print(service)
 
